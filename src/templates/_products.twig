@@ -38,9 +38,9 @@
             {% else %}
                 <g:availability>out of stock</g:availability>
             {% endif %}
-            {% set imageLink = attribute(product, settings.image_link) %}
+            {% set imageLink = getProductFirstImage(product.productImages) %
             {% if imageLink|length %}
-                <g:image_link>{{ imageLink.one().getUrl() }}</g:image_link>
+            <g:image_link>{{ siteUrl|trim('/') ~ imageLink }}</g:image_link>
             {% endif %}
             {% if settings.brand == 'custom' and settings.brandCustom|length %}
                 {% set brand = settings.brandCustom %}
