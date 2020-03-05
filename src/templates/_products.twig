@@ -16,14 +16,15 @@
                     {% endif %}
                 {% endif %}
                 <g:id>{{ id }}</g:id>
-                <title>{{ attribute(product, settings.title) }}</title>
+                <title>{{ product.afasSku  }} :: {{ attribute(product, settings.title) }}</title>
                 <description>{{ attribute(product, settings.description)|striptags }}</description>
                 <link>{{ product.getUrl() }}</link>
+                {% set productPrice = craft.prices.getPriceWithOrWithoutDiscount(product.defaultVariant).price * 1.21 %}
                 {% if craft.commerce.paymentCurrencies.getAllPaymentCurrencies()|length == 1 %}
                     {% set currency = craft.commerce.paymentCurrencies.getPrimaryPaymentCurrencyIso() %}
-                    <g:price>{{ attribute(product.defaultVariant, settings.price) }} {{ currency }}</g:price>
+                    <g:price>{{ productPrice }} {{ currency }}</g:price>
                 {% else %}
-                    <g:price>{{ attribute(product.defaultVariant, settings.price) }} {{ settings.currencyIso }}</g:price>
+                    <g:price>{{ productPrice }} {{ settings.currencyIso }}</g:price>
                 {% endif %}
                 <g:condition>new</g:condition>
                 {% if product.defaultVariant.hasUnlimitedStock %}
@@ -33,10 +34,14 @@
                 {% else %}
                     <g:availability>out of stock</g:availability>
                 {% endif %}
-                {% set imageLink = attribute(product, settings.image_link) %}
-                {% if imageLink|length %}
-                    <g:image_link>{{ imageLink.one().getUrl() }}</g:image_link>
-                {% endif %}
+                {% set images = getAllProductImages(product.productImages) %}
+                {% for image in images %}
+                    {% if loop.first %}
+                    <g:image_link>{{ siteUrl|trim('/') ~ image }}</g:image_link>
+                    {% else %}
+                    <g:additional_image_link>{{ siteUrl|trim('/') ~ image }}</g:additional_image_link>
+                    {% endif %}
+                {% endfor %}
                 {% if settings.brand == 'custom' and settings.brandCustom|length %}
                     {% set brand = settings.brandCustom %}
                 {% elseif attribute(product, settings.brand) is instance of('craft\\elements\\db\\CategoryQuery') %}
@@ -55,9 +60,8 @@
                     {% set brand = attribute(product, settings.brand) %}
                 {% endif %}
                 <g:brand>{{ brand }}</g:brand>
-                {% if settings.mpn %}
-                    <g:mpn>{{ attribute(product, settings.mpn) }}</g:mpn>
-                {% endif %}
+                <g:mpn>{{ product.afasSku }}</g:mpn>
+                <g:product_type>Webshop{% for category in product.pcategory.all() %} &gt; {{ category.title }}{% endfor %}</g:product_type>
             </item>
         {% endfor %}
     </channel>
